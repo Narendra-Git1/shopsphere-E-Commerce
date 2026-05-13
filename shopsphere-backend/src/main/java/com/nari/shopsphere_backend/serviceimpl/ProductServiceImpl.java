@@ -10,6 +10,11 @@ import com.nari.shopsphere_backend.exception.ProductNotFoundException;
 import com.nari.shopsphere_backend.repository.ProductRepository;
 import com.nari.shopsphere_backend.service.ProductService;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
 @Service
 public class ProductServiceImpl implements ProductService {
 
@@ -71,6 +76,35 @@ public class ProductServiceImpl implements ProductService {
     public void deleteProduct(Long id) {
 
         productRepository.deleteById(id);
+    }
+    
+    @Override
+    public Page<Product> getProductsWithPagination(
+            int page,
+            int size,
+            String sortBy) {
+
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(sortBy));
+
+        return productRepository.findAll(pageable);
+    }
+
+
+    @Override
+    public Page<Product> searchProducts(
+            String keyword,
+            int page,
+            int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        return productRepository
+                .findByNameContainingIgnoreCase(
+                        keyword,
+                        pageable);
     }
 
 }

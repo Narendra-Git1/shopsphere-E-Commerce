@@ -1,5 +1,7 @@
 package com.nari.shopsphere_backend.controller;
 
+import org.springframework.data.domain.Page;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,6 +91,38 @@ public class ProductController {
 
         return ResponseEntity.ok(
                 "Product Deleted Successfully");
+    }
+    
+//    ADD PAGINATION API
+    @GetMapping("/pagination")
+    public ResponseEntity<Page<Product>>
+    getProductsWithPagination(
+
+            @RequestParam int page,
+            @RequestParam int size,
+            @RequestParam String sortBy) {
+
+        return ResponseEntity.ok(
+                productService.getProductsWithPagination(
+                        page,
+                        size,
+                        sortBy));
+    }
+    
+//    ADD SEARCH API
+    @GetMapping("/search")
+    public ResponseEntity<Page<Product>>
+    searchProducts(
+
+            @RequestParam String keyword,
+            @RequestParam int page,
+            @RequestParam int size) {
+
+        return ResponseEntity.ok(
+                productService.searchProducts(
+                        keyword,
+                        page,
+                        size));
     }
 
 }
