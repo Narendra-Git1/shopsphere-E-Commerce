@@ -2,6 +2,9 @@ package com.nari.shopsphere_backend.controller;
 
 import org.springframework.data.domain.Page;
 
+import com.nari.shopsphere_backend.entity.Category;
+import com.nari.shopsphere_backend.repository.CategoryRepository;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +24,8 @@ public class ProductController {
 
     @Autowired
     private ProductService productService;
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     
     // ADD PRODUCT
@@ -28,6 +33,12 @@ public class ProductController {
     public ResponseEntity<Product> addProduct(
             @Valid @RequestBody ProductDTO productDTO) {
 
+        Category category = categoryRepository
+                .findById(productDTO.getCategoryId())
+                .orElseThrow(() ->
+                        new RuntimeException("Category Not Found"));
+
+        
         Product product = new Product();
 
         product.setName(productDTO.getName());
@@ -35,13 +46,19 @@ public class ProductController {
         product.setPrice(productDTO.getPrice());
         product.setStockQuantity(productDTO.getStockQuantity());
         product.setImageUrl(productDTO.getImageUrl());
-        product.setCategory(productDTO.getCategory());
 
-        Product savedProduct = productService.addProduct(product);
+        
+        // SET CATEGORY OBJECT
+        product.setCategory(category);
 
-        return new ResponseEntity<>(savedProduct, HttpStatus.CREATED);
+        
+        Product savedProduct =
+                productService.addProduct(product);
+
+        return new ResponseEntity<>(
+                savedProduct,
+                HttpStatus.CREATED);
     }
-
     
     // GET ALL PRODUCTS
     @GetMapping
@@ -73,7 +90,7 @@ public class ProductController {
         product.setPrice(productDTO.getPrice());
         product.setStockQuantity(productDTO.getStockQuantity());
         product.setImageUrl(productDTO.getImageUrl());
-        product.setCategory(productDTO.getCategory());
+        productDTO.getCategoryId();
 
         Product updatedProduct =
                 productService.updateProduct(id, product);

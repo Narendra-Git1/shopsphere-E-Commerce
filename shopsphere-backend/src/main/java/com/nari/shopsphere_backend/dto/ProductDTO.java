@@ -38,7 +38,6 @@ public class ProductDTO {
     private String imageUrl;
 
     
-    @NotBlank(message = "Category is required")
-    private String category;
-
+    @NotNull(message = "Category ID is required")
+    private Long categoryId;
 }
