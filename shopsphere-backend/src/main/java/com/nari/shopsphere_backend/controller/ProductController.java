@@ -1,19 +1,18 @@
 package com.nari.shopsphere_backend.controller;
 
-import org.springframework.data.domain.Page;
-
-import com.nari.shopsphere_backend.entity.Category;
-import com.nari.shopsphere_backend.repository.CategoryRepository;
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.nari.shopsphere_backend.dto.ProductDTO;
+import com.nari.shopsphere_backend.entity.Category;
 import com.nari.shopsphere_backend.entity.Product;
+import com.nari.shopsphere_backend.payload.ApiResponse;
+import com.nari.shopsphere_backend.repository.CategoryRepository;
 import com.nari.shopsphere_backend.service.ProductService;
 
 import jakarta.validation.Valid;
@@ -24,19 +23,22 @@ public class ProductController {
 
     @Autowired
     private ProductService productService;
+
     @Autowired
     private CategoryRepository categoryRepository;
 
     
     // ADD PRODUCT
     @PostMapping
-    public ResponseEntity<Product> addProduct(
+    public ResponseEntity<ApiResponse<Product>>
+    addProduct(
             @Valid @RequestBody ProductDTO productDTO) {
 
         Category category = categoryRepository
                 .findById(productDTO.getCategoryId())
                 .orElseThrow(() ->
-                        new RuntimeException("Category Not Found"));
+                        new RuntimeException(
+                                "Category Not Found"));
 
         
         Product product = new Product();
@@ -48,41 +50,82 @@ public class ProductController {
         product.setImageUrl(productDTO.getImageUrl());
 
         
-        // SET CATEGORY OBJECT
+        // SET CATEGORY
         product.setCategory(category);
 
         
         Product savedProduct =
                 productService.addProduct(product);
 
+        
+        ApiResponse<Product> response =
+                new ApiResponse<>(
+                        true,
+                        "Product Added Successfully",
+                        savedProduct);
+
+        
         return new ResponseEntity<>(
-                savedProduct,
+                response,
                 HttpStatus.CREATED);
     }
+
     
     // GET ALL PRODUCTS
     @GetMapping
-    public ResponseEntity<List<Product>> getAllProducts() {
+    public ResponseEntity<ApiResponse<List<Product>>>
+    getAllProducts() {
 
-        return ResponseEntity.ok(productService.getAllProducts());
+        List<Product> products =
+                productService.getAllProducts();
+
+        
+        ApiResponse<List<Product>> response =
+                new ApiResponse<>(
+                        true,
+                        "Products Fetched Successfully",
+                        products);
+
+        
+        return ResponseEntity.ok(response);
     }
 
     
     // GET PRODUCT BY ID
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(
+    public ResponseEntity<ApiResponse<Product>>
+    getProductById(
             @PathVariable Long id) {
 
-        return ResponseEntity.ok(productService.getProductById(id));
+        Product product =
+                productService.getProductById(id);
+
+        
+        ApiResponse<Product> response =
+                new ApiResponse<>(
+                        true,
+                        "Product Fetched Successfully",
+                        product);
+
+        
+        return ResponseEntity.ok(response);
     }
 
     
     // UPDATE PRODUCT
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(
+    public ResponseEntity<ApiResponse<Product>>
+    updateProduct(
             @PathVariable Long id,
             @Valid @RequestBody ProductDTO productDTO) {
 
+        Category category = categoryRepository
+                .findById(productDTO.getCategoryId())
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Category Not Found"));
+
+        
         Product product = new Product();
 
         product.setName(productDTO.getName());
@@ -90,56 +133,186 @@ public class ProductController {
         product.setPrice(productDTO.getPrice());
         product.setStockQuantity(productDTO.getStockQuantity());
         product.setImageUrl(productDTO.getImageUrl());
-        productDTO.getCategoryId();
 
+        
+        // SET CATEGORY
+        product.setCategory(category);
+
+        
         Product updatedProduct =
                 productService.updateProduct(id, product);
 
-        return ResponseEntity.ok(updatedProduct);
+        
+        ApiResponse<Product> response =
+                new ApiResponse<>(
+                        true,
+                        "Product Updated Successfully",
+                        updatedProduct);
+
+        
+        return ResponseEntity.ok(response);
     }
 
     
     // DELETE PRODUCT
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteProduct(
+    public ResponseEntity<ApiResponse<String>>
+    deleteProduct(
             @PathVariable Long id) {
 
         productService.deleteProduct(id);
 
-        return ResponseEntity.ok(
-                "Product Deleted Successfully");
+        
+        ApiResponse<String> response =
+                new ApiResponse<>(
+                        true,
+                        "Product Deleted Successfully",
+                        null);
+
+        
+        return ResponseEntity.ok(response);
     }
+
     
-//    ADD PAGINATION API
+    // PAGINATION API
     @GetMapping("/pagination")
-    public ResponseEntity<Page<Product>>
+    public ResponseEntity<ApiResponse<Page<Product>>>
     getProductsWithPagination(
 
             @RequestParam int page,
             @RequestParam int size,
             @RequestParam String sortBy) {
 
-        return ResponseEntity.ok(
+        Page<Product> products =
                 productService.getProductsWithPagination(
                         page,
                         size,
-                        sortBy));
+                        sortBy);
+
+        
+        ApiResponse<Page<Product>> response =
+                new ApiResponse<>(
+                        true,
+                        "Products Fetched Successfully",
+                        products);
+
+        
+        return ResponseEntity.ok(response);
     }
+
     
-//    ADD SEARCH API
+    // SEARCH API
     @GetMapping("/search")
-    public ResponseEntity<Page<Product>>
+    public ResponseEntity<ApiResponse<Page<Product>>>
     searchProducts(
 
             @RequestParam String keyword,
             @RequestParam int page,
             @RequestParam int size) {
 
-        return ResponseEntity.ok(
+        Page<Product> products =
                 productService.searchProducts(
                         keyword,
                         page,
-                        size));
+                        size);
+
+        
+        ApiResponse<Page<Product>> response =
+                new ApiResponse<>(
+                        true,
+                        "Products Searched Successfully",
+                        products);
+
+        
+        return ResponseEntity.ok(response);
+    }
+    
+ // FILTER BY CATEGORY
+    @GetMapping("/category/{categoryId}")
+    public ResponseEntity<ApiResponse<List<Product>>>
+    getProductsByCategory(
+            @PathVariable Long categoryId) {
+
+        List<Product> products =
+                productService.getProductsByCategory(
+                        categoryId);
+
+        
+        ApiResponse<List<Product>> response =
+                new ApiResponse<>(
+                        true,
+                        "Products Fetched Successfully",
+                        products);
+
+        
+        return ResponseEntity.ok(response);
+    }
+
+
+    // FILTER BY PRICE RANGE
+    @GetMapping("/price")
+    public ResponseEntity<ApiResponse<List<Product>>>
+    getProductsByPriceRange(
+
+            @RequestParam Double min,
+            @RequestParam Double max) {
+
+        List<Product> products =
+                productService.getProductsByPriceRange(
+                        min,
+                        max);
+
+        
+        ApiResponse<List<Product>> response =
+                new ApiResponse<>(
+                        true,
+                        "Products Fetched Successfully",
+                        products);
+
+        
+        return ResponseEntity.ok(response);
+    }
+
+
+    // SORT PRICE LOW TO HIGH
+    @GetMapping("/sort/asc")
+    public ResponseEntity<ApiResponse<List<Product>>>
+    sortLowToHigh() {
+
+        List<Product> products =
+                productService
+                        .getProductsPriceLowToHigh();
+
+        
+        ApiResponse<List<Product>> response =
+                new ApiResponse<>(
+                        true,
+                        "Products Sorted Low To High",
+                        products);
+
+        
+        return ResponseEntity.ok(response);
+    }
+
+
+    // SORT PRICE HIGH TO LOW
+    @GetMapping("/sort/desc")
+    public ResponseEntity<ApiResponse<List<Product>>>
+    sortHighToLow() {
+
+        List<Product> products =
+                productService
+                        .getProductsPriceHighToLow();
+
+        
+        ApiResponse<List<Product>> response =
+                new ApiResponse<>(
+                        true,
+                        "Products Sorted High To Low",
+                        products);
+
+        
+        return ResponseEntity.ok(response);
     }
 
 }
