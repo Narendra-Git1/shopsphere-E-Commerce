@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
 @Component
@@ -38,11 +37,15 @@ public class JwtUtil {
     
     // GENERATE TOKEN
     public String generateToken(
-            String email) {
+            String email,
+            String role) {
 
         return Jwts.builder()
 
                 .setSubject(email)
+
+                // ADD ROLE
+                .claim("role", role)
 
                 .setIssuedAt(
                         new Date(System.currentTimeMillis()))
@@ -65,6 +68,15 @@ public class JwtUtil {
 
         return extractClaims(token)
                 .getSubject();
+    }
+
+    
+    // EXTRACT ROLE
+    public String extractRole(
+            String token) {
+
+        return extractClaims(token)
+                .get("role", String.class);
     }
 
     

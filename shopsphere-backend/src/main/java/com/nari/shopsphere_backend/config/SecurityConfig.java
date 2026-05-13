@@ -1,9 +1,12 @@
 package com.nari.shopsphere_backend.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+
+import org.springframework.security.config.http.SessionCreationPolicy;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -11,8 +14,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.security.web.SecurityFilterChain;
 
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.nari.shopsphere_backend.jwt.JwtAuthenticationFilter;
+
 @Configuration
 public class SecurityConfig {
+
+    
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     
     // PASSWORD ENCODER
@@ -31,15 +42,23 @@ public class SecurityConfig {
 
         
         http
+
+            // DISABLE CSRF
             .csrf(csrf -> csrf.disable())
 
+            
+            // STATELESS SESSION
+            .sessionManagement(session ->
+                    session.sessionCreationPolicy(
+                            SessionCreationPolicy.STATELESS))
+
+            
+            // AUTHORIZATION
             .authorizeHttpRequests(auth -> auth
 
                     
-                // PUBLIC APIs
+                // SWAGGER APIs
                 .requestMatchers(
-
-                        "/api/auth/**",
 
                         "/swagger-ui/**",
 
@@ -48,10 +67,43 @@ public class SecurityConfig {
                 ).permitAll()
 
                     
-                // SECURE ALL OTHER APIs
+                // AUTH APIs
+                .requestMatchers(
+
+                        "/api/auth/**"
+
+                ).permitAll()
+
+                    
+                // PUBLIC PRODUCT APIs
+                .requestMatchers(
+
+                        "/api/products/**",
+
+                        "/api/categories/**"
+
+                ).permitAll()
+
+                    
+                // ADMIN ONLY APIs
+                .requestMatchers(
+
+                        "/api/admin/**"
+
+                ).hasRole("ADMIN")
+
+                    
+                // ALL OTHER APIs REQUIRE LOGIN
                 .anyRequest().authenticated()
             );
 
+        
+        // ADD JWT FILTER
+        http.addFilterBefore(
+                jwtAuthenticationFilter,
+                UsernamePasswordAuthenticationFilter.class);
+
+        
         return http.build();
     }
 }

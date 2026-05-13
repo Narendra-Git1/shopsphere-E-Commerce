@@ -17,12 +17,15 @@ import com.nari.shopsphere_backend.service.UserService;
 @RequestMapping("/api/auth")
 public class AuthController {
 
+    
     @Autowired
     private UserService userService;
 
+    
     @Autowired
     private JwtUtil jwtUtil;
 
+    
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -37,10 +40,16 @@ public class AuthController {
                 userService.registerUser(request);
 
         return ResponseEntity.ok(
+
                 new ApiResponse<>(
+
                         true,
+
                         "User Registered Successfully",
-                        savedUser));
+
+                        savedUser
+                )
+        );
     }
 
     
@@ -50,6 +59,8 @@ public class AuthController {
     loginUser(
             @RequestBody AuthRequest request) {
 
+        
+        // FIND USER
         User user =
                 userService.findByEmail(
                         request.getEmail());
@@ -57,7 +68,9 @@ public class AuthController {
         
         // CHECK PASSWORD
         if (!passwordEncoder.matches(
+
                 request.getPassword(),
+
                 user.getPassword())) {
 
             throw new RuntimeException(
@@ -68,9 +81,16 @@ public class AuthController {
         // GENERATE JWT TOKEN
         String token =
                 jwtUtil.generateToken(
-                        user.getEmail());
 
+                        user.getEmail(),
+
+                        user.getRole().name()
+                );
+
+        
         return ResponseEntity.ok(
-                new AuthResponse(token));
+
+                new AuthResponse(token)
+        );
     }
 }
