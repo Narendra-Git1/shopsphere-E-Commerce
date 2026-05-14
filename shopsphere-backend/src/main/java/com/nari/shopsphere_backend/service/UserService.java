@@ -14,4 +14,6 @@ public interface UserService {
     // FIND USER BY EMAIL
     User findByEmail(
             String email);
+    
+    User save(User user);
 }

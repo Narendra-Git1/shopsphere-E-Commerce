@@ -51,7 +51,11 @@ public class UserServiceImpl
 
         return userRepository.save(user);
     }
+    @Override
+    public User save(User user) {
 
+        return userRepository.save(user);
+    }
     
     // FIND USER BY EMAIL
     @Override
