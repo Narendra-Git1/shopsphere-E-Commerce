@@ -29,7 +29,8 @@ public class Order {
 
     
     // ORDER STATUS
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
 
     
     // ONE ORDER → MANY ORDER ITEMS

@@ -53,7 +53,7 @@ public class SecurityConfig {
                             SessionCreationPolicy.STATELESS))
 
             
-            // AUTHORIZATION
+            // API AUTHORIZATION
             .authorizeHttpRequests(auth -> auth
 
                     
@@ -80,12 +80,13 @@ public class SecurityConfig {
 
                         "/api/products/**",
 
-                        "/api/categories/**"
+                        "/api/categories/**",
+
+                        "/api/cart/**"
 
                 ).permitAll()
-
                     
-                // ADMIN ONLY APIs
+                // ADMIN APIs
                 .requestMatchers(
 
                         "/api/admin/**"
@@ -93,15 +94,18 @@ public class SecurityConfig {
                 ).hasRole("ADMIN")
 
                     
-                // ALL OTHER APIs REQUIRE LOGIN
+                // ALL OTHER APIs
                 .anyRequest().authenticated()
-            );
+            )
 
-        
-        // ADD JWT FILTER
-        http.addFilterBefore(
-                jwtAuthenticationFilter,
-                UsernamePasswordAuthenticationFilter.class);
+            
+            // ADD JWT FILTER
+            .addFilterBefore(
+
+                    jwtAuthenticationFilter,
+
+                    UsernamePasswordAuthenticationFilter.class
+            );
 
         
         return http.build();

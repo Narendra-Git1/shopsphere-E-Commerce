@@ -10,6 +10,7 @@ import com.nari.shopsphere_backend.entity.Cart;
 import com.nari.shopsphere_backend.entity.CartItem;
 import com.nari.shopsphere_backend.entity.Order;
 import com.nari.shopsphere_backend.entity.OrderItem;
+import com.nari.shopsphere_backend.entity.OrderStatus;
 import com.nari.shopsphere_backend.repository.CartRepository;
 import com.nari.shopsphere_backend.repository.OrderRepository;
 import com.nari.shopsphere_backend.service.OrderService;
@@ -35,7 +36,12 @@ public class OrderServiceImpl implements OrderService {
         
         Order order = new Order();
 
-        order.setStatus("PENDING");
+        
+        // ORDER STATUS
+        order.setStatus(OrderStatus.PENDING);
+
+        
+        // TOTAL AMOUNT
         order.setTotalAmount(cart.getTotalPrice());
 
         
@@ -75,6 +81,7 @@ public class OrderServiceImpl implements OrderService {
         
         // CLEAR CART
         cart.getCartItems().clear();
+
         cart.setTotalPrice(0.0);
 
         cartRepository.save(cart);
@@ -99,5 +106,42 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() ->
                         new RuntimeException(
                                 "Order Not Found"));
+    }
+
+    
+    // UPDATE ORDER STATUS
+    @Override
+    public Order updateOrderStatus(
+            Long orderId,
+            OrderStatus status) {
+
+        Order order =
+                orderRepository.findById(orderId)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Order Not Found"));
+
+        order.setStatus(status);
+
+        return orderRepository.save(order);
+    }
+
+    
+    // TOTAL REVENUE
+    @Override
+    public Double getTotalRevenue() {
+
+        return orderRepository.findAll()
+                .stream()
+                .mapToDouble(Order::getTotalAmount)
+                .sum();
+    }
+
+    
+    // TOTAL ORDERS COUNT
+    @Override
+    public Long getTotalOrders() {
+
+        return orderRepository.count();
     }
 }

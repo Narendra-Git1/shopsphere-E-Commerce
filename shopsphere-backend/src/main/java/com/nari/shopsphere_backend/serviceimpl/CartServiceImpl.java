@@ -55,7 +55,7 @@ public class CartServiceImpl
         cartItem.setQuantity(quantity);
 
         
-        // subtotal
+        // SUBTOTAL
         cartItem.setSubTotal(
                 product.getPrice() * quantity);
 
@@ -67,15 +67,7 @@ public class CartServiceImpl
                 .add(cartItem);
 
         
-        // update total cart price
-        double total =
-                cart.getCartItems()
-                .stream()
-                .mapToDouble(
-                        CartItem::getSubTotal)
-                .sum();
-
-        cart.setTotalPrice(total);
+        updateCartTotal(cart);
 
         
         return cartRepository.save(cart);
@@ -94,13 +86,73 @@ public class CartServiceImpl
     }
 
     
+    // UPDATE CART ITEM QUANTITY
+    @Override
+    public Cart updateCartItemQuantity(
+            Long cartItemId,
+            Integer quantity) {
+
+        
+        CartItem cartItem =
+                cartItemRepository
+                .findById(cartItemId)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Cart Item Not Found"));
+
+        
+        cartItem.setQuantity(quantity);
+
+        
+        cartItem.setSubTotal(
+
+                cartItem.getProduct().getPrice()
+                        * quantity);
+
+        
+        cartItemRepository.save(cartItem);
+
+        
+        Cart cart =
+                cartItem.getCart();
+
+        
+        updateCartTotal(cart);
+
+        
+        return cartRepository.save(cart);
+    }
+
+    
     // REMOVE CART ITEM
     @Override
     public void removeCartItem(
             Long cartItemId) {
 
-        cartItemRepository
-                .deleteById(cartItemId);
+        
+        CartItem cartItem =
+                cartItemRepository
+                .findById(cartItemId)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Cart Item Not Found"));
+
+        
+        Cart cart =
+                cartItem.getCart();
+
+        
+        cart.getCartItems()
+                .remove(cartItem);
+
+        
+        cartItemRepository.delete(cartItem);
+
+        
+        updateCartTotal(cart);
+
+        
+        cartRepository.save(cart);
     }
 
     
@@ -108,12 +160,33 @@ public class CartServiceImpl
     @Override
     public void clearCart(Long cartId) {
 
+        
         Cart cart = getCart(cartId);
 
+        
         cart.getCartItems().clear();
 
+        
         cart.setTotalPrice(0.0);
 
+        
         cartRepository.save(cart);
+    }
+
+    
+    // UPDATE TOTAL PRICE
+    private void updateCartTotal(
+            Cart cart) {
+
+        
+        double total =
+                cart.getCartItems()
+                .stream()
+                .mapToDouble(
+                        CartItem::getSubTotal)
+                .sum();
+
+        
+        cart.setTotalPrice(total);
     }
 }

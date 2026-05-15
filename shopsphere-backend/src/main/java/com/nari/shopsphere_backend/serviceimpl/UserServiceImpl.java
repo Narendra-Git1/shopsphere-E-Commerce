@@ -1,6 +1,7 @@
 package com.nari.shopsphere_backend.serviceimpl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import java.util.List;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -66,5 +67,30 @@ public class UserServiceImpl
                 .orElseThrow(() ->
                         new RuntimeException(
                                 "User Not Found"));
+    }
+    
+    @Override
+    public List<User> getAllUsers() {
+
+        return userRepository.findAll();
+    }
+
+
+    @Override
+    public User getUserById(Long id) {
+
+        return userRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "User Not Found"));
+    }
+
+
+    @Override
+    public void deleteUser(Long id) {
+
+        User user = getUserById(id);
+
+        userRepository.delete(user);
     }
 }

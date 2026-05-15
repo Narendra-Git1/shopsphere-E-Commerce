@@ -70,17 +70,18 @@ public class JwtAuthenticationFilter
                     token,
                     user.getEmail())) {
 
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
+            	UsernamePasswordAuthenticationToken authToken =
+            	        new UsernamePasswordAuthenticationToken(
 
-                                user,
+            	                user,
 
-                                null,
+            	                null,
 
-                                List.of(
-                                        new SimpleGrantedAuthority(
-                                                "ROLE_" + user.getRole()))
-                        );
+            	                List.of(
+            	                        new SimpleGrantedAuthority(
+            	                                "ROLE_" + user.getRole().name()))
+            	        );
+            	        
 
                 authToken.setDetails(
                         new WebAuthenticationDetailsSource()

@@ -12,6 +12,7 @@ import com.nari.shopsphere_backend.service.CartService;
 @RequestMapping("/api/cart")
 public class CartController {
 
+    
     @Autowired
     private CartService cartService;
 
@@ -22,21 +23,32 @@ public class CartController {
     addToCart(
 
             @RequestParam Long cartId,
+
             @RequestParam Long productId,
+
             @RequestParam Integer quantity) {
 
+        
         Cart cart =
                 cartService.addToCart(
+
                         cartId,
+
                         productId,
+
                         quantity);
 
         
         return ResponseEntity.ok(
+
                 new ApiResponse<>(
+
                         true,
+
                         "Product Added To Cart",
-                        cart));
+
+                        cart
+                ));
     }
 
     
@@ -46,15 +58,52 @@ public class CartController {
     getCart(
             @PathVariable Long cartId) {
 
+        
         Cart cart =
                 cartService.getCart(cartId);
 
         
         return ResponseEntity.ok(
+
                 new ApiResponse<>(
+
                         true,
+
                         "Cart Fetched Successfully",
-                        cart));
+
+                        cart
+                ));
+    }
+
+    
+    // UPDATE CART ITEM QUANTITY
+    @PutMapping("/update/{cartItemId}")
+    public ResponseEntity<ApiResponse<Cart>>
+    updateCartItemQuantity(
+
+            @PathVariable Long cartItemId,
+
+            @RequestParam Integer quantity) {
+
+        
+        Cart cart =
+                cartService.updateCartItemQuantity(
+
+                        cartItemId,
+
+                        quantity);
+
+        
+        return ResponseEntity.ok(
+
+                new ApiResponse<>(
+
+                        true,
+
+                        "Cart Updated Successfully",
+
+                        cart
+                ));
     }
 
     
@@ -64,15 +113,21 @@ public class CartController {
     removeCartItem(
             @PathVariable Long cartItemId) {
 
+        
         cartService.removeCartItem(
                 cartItemId);
 
         
         return ResponseEntity.ok(
+
                 new ApiResponse<>(
+
                         true,
+
                         "Cart Item Removed",
-                        null));
+
+                        null
+                ));
     }
 
     
@@ -82,13 +137,19 @@ public class CartController {
     clearCart(
             @PathVariable Long cartId) {
 
+        
         cartService.clearCart(cartId);
 
         
         return ResponseEntity.ok(
+
                 new ApiResponse<>(
+
                         true,
+
                         "Cart Cleared Successfully",
-                        null));
+
+                        null
+                ));
     }
 }

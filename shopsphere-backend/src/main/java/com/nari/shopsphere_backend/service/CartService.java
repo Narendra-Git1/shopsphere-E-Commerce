@@ -16,6 +16,12 @@ public interface CartService {
     Cart getCart(Long cartId);
 
     
+    // UPDATE CART ITEM QUANTITY
+    Cart updateCartItemQuantity(
+            Long cartItemId,
+            Integer quantity);
+
+    
     // REMOVE CART ITEM
     void removeCartItem(Long cartItemId);
 
