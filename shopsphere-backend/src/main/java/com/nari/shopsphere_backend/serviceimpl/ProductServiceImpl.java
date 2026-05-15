@@ -30,11 +30,11 @@ public class ProductServiceImpl
     }
 
     
-    // GET ALL PRODUCTS
+    // GET ALL ACTIVE PRODUCTS
     @Override
     public List<Product> getAllProducts() {
 
-        return productRepository.findAll();
+        return productRepository.findByActiveTrue();
     }
 
     
@@ -72,11 +72,19 @@ public class ProductServiceImpl
     }
 
     
-    // DELETE PRODUCT
+    // SOFT DELETE PRODUCT
     @Override
     public void deleteProduct(Long id) {
 
-        productRepository.deleteById(id);
+        Product product =
+                productRepository.findById(id)
+                .orElseThrow(() ->
+                        new ProductNotFoundException(
+                                "Product Not Found"));
+
+        product.setActive(false);
+
+        productRepository.save(product);
     }
 
     
@@ -140,8 +148,10 @@ public class ProductServiceImpl
     public List<Product> getProductsPriceLowToHigh() {
 
         return productRepository
-                .findAll(Sort.by(Sort.Direction.ASC,
-                        "price"));
+                .findAll(
+                        Sort.by(
+                                Sort.Direction.ASC,
+                                "price"));
     }
 
     
@@ -150,7 +160,9 @@ public class ProductServiceImpl
     public List<Product> getProductsPriceHighToLow() {
 
         return productRepository
-                .findAll(Sort.by(Sort.Direction.DESC,
-                        "price"));
+                .findAll(
+                        Sort.by(
+                                Sort.Direction.DESC,
+                                "price"));
     }
 }

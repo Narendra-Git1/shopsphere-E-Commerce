@@ -36,4 +36,7 @@ public interface ProductRepository
     // SORT HIGH TO LOW
     List<Product> findByOrderByPriceDesc();
 
+    
+    // ONLY ACTIVE PRODUCTS
+    List<Product> findByActiveTrue();
 }

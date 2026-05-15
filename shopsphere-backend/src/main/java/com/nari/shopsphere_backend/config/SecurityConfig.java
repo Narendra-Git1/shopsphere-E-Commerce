@@ -5,15 +5,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-
 import org.springframework.security.config.http.SessionCreationPolicy;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.security.web.SecurityFilterChain;
-
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.nari.shopsphere_backend.jwt.JwtAuthenticationFilter;
@@ -21,7 +18,6 @@ import com.nari.shopsphere_backend.jwt.JwtAuthenticationFilter;
 @Configuration
 public class SecurityConfig {
 
-    
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -40,65 +36,39 @@ public class SecurityConfig {
             HttpSecurity http)
             throws Exception {
 
-        
         http
 
             // DISABLE CSRF
             .csrf(csrf -> csrf.disable())
 
-            
             // STATELESS SESSION
             .sessionManagement(session ->
                     session.sessionCreationPolicy(
                             SessionCreationPolicy.STATELESS))
 
-            
             // API AUTHORIZATION
             .authorizeHttpRequests(auth -> auth
 
-                    
-                // SWAGGER APIs
-                .requestMatchers(
+                    // PUBLIC APIs
+                    .requestMatchers(
 
-                        "/swagger-ui/**",
+                            "/api/auth/**",
+                            "/swagger-ui/**",
+                            "/v3/api-docs/**"
 
-                        "/v3/api-docs/**"
+                    ).permitAll()
 
-                ).permitAll()
+                    // ADMIN APIs
+                    .requestMatchers(
 
-                    
-                // AUTH APIs
-                .requestMatchers(
+                            "/api/admin/**"
 
-                        "/api/auth/**"
+                    ).hasRole("ADMIN")
 
-                ).permitAll()
-
-                    
-                // PUBLIC PRODUCT APIs
-                .requestMatchers(
-
-                        "/api/products/**",
-
-                        "/api/categories/**",
-
-                        "/api/cart/**"
-
-                ).permitAll()
-                    
-                // ADMIN APIs
-                .requestMatchers(
-
-                        "/api/admin/**"
-
-                ).hasRole("ADMIN")
-
-                    
-                // ALL OTHER APIs
-                .anyRequest().authenticated()
+                    // ALL OTHER APIs
+                    .anyRequest().authenticated()
             )
 
-            
             // ADD JWT FILTER
             .addFilterBefore(
 
@@ -107,7 +77,6 @@ public class SecurityConfig {
                     UsernamePasswordAuthenticationFilter.class
             );
 
-        
         return http.build();
     }
 }
